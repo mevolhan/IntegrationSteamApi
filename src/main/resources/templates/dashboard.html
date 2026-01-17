@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Панель управления - Achievement Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --steam-dark: #171a21;
+            --steam-blue: #1b2838;
+            --steam-light-blue: #2a475e;
+            --steam-accent: #66c0f4;
+            --steam-text: #c7d5e0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--steam-dark) 0%, var(--steam-blue) 50%, var(--steam-light-blue) 100%);
+            color: white;
+            padding: 80px 0 60px;
+            margin-bottom: 50px;
+            border-radius: 0 0 20px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(102, 192, 244, 0.1) 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+            height: 100%;
+            text-align: center;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(102, 192, 244, 0.15);
+            border-color: var(--steam-accent);
+        }
+
+        .card-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, var(--steam-accent) 0%, var(--steam-light-blue) 100%);
+            color: white;
+            box-shadow: 0 6px 16px rgba(102, 192, 244, 0.3);
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(102, 192, 244, 0.15);
+            border-color: var(--steam-accent);
+        }
+
+        .stats-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            background: linear-gradient(135deg, var(--steam-accent) 0%, var(--steam-light-blue) 100%);
+            color: white;
+            margin-right: 1rem;
+        }
+
+        .quick-action-btn {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 600;
+            color: var(--steam-dark);
+            display: block;
+            text-decoration: none;
+        }
+
+        .quick-action-btn:hover {
+            border-color: var(--steam-accent);
+            color: var(--steam-accent);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(102, 192, 244, 0.15);
+            text-decoration: none;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 3rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--steam-dark) 0%, var(--steam-light-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--steam-accent) 0%, var(--steam-light-blue) 100%);
+            border-radius: 2px;
+        }
+
+        .btn-steam {
+            background: linear-gradient(135deg, var(--steam-dark) 0%, var(--steam-light-blue) 100%);
+            border: 2px solid var(--steam-accent);
+            color: white;
+            border-radius: 10px;
+            padding: 10px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-steam:hover {
+            background: linear-gradient(135deg, var(--steam-accent) 0%, var(--steam-light-blue) 100%);
+            border-color: white;
+            color: var(--steam-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 192, 244, 0.3);
+        }
+
+        .btn-outline-steam {
+            border: 2px solid var(--steam-accent);
+            color: var(--steam-accent);
+            background: transparent;
+            border-radius: 10px;
+            padding: 10px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-steam:hover {
+            background: var(--steam-accent);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 192, 244, 0.3);
+        }
+
+        /* Навигация */
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            margin: 0 2px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: linear-gradient(135deg, var(--steam-accent) 0%, var(--steam-light-blue) 100%);
+            color: white !important;
+        }
+
+        .user-avatar-nav {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--steam-accent) 0%, var(--steam-light-blue) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            margin-right: 10px;
+        }
+
+        /* Активность */
+        .activity-item {
+            padding: 1rem;
+            border-left: 4px solid var(--steam-accent);
+            background: white;
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .activity-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* Progress bars */
+        .progress-steam {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e9ecef;
+            overflow: hidden;
+        }
+
+        .progress-steam .progress-bar {
+            background: linear-gradient(90deg, var(--steam-accent) 0%, var(--steam-light-blue) 100%);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+<!-- Навигационная панель -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/">
+            <i class="bi bi-trophy-fill me-2"></i>Achievement Tracker
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">
+                        Главная
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/gamers">
+                        Игроки
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/leaderboards">
+                        Таблица лидеров
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/steam/connect">
+                        Steam
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/dashboard">
+                        Панель управления
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Профиль пользователя -->
+            <div class="navbar-nav" th:if="${session.authenticated != null}">
+                <div class="nav-item dropdown">
+                    <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center"
+                            type="button"
+                            id="userDropdown"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                            style="border-radius: 10px; padding: 8px 16px;">
+                        <div class="user-avatar-nav me-2">
+                            <span th:text="${#strings.substring(session.username, 0, 1).toUpperCase()}"></span>
+                        </div>
+                        <span th:text="${session.username}" class="fw-bold"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown" style="border-radius: 10px; border: 2px solid var(--steam-accent);">
+                        <li>
+                            <a class="dropdown-item" href="/profile">
+                                <i class="bi bi-person me-2"></i>Мой профиль
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/profile/edit">
+                                <i class="bi bi-pencil me-2"></i>Редактировать
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="/logout">
+                                <i class="bi bi-box-arrow-right me-2"></i>Выйти
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="navbar-nav" th:unless="${session.authenticated != null}">
+                <a class="nav-link" href="/login">
+                    <i class="bi bi-box-arrow-in-right me-1"></i>Вход
+                </a>
+                <a class="nav-link" href="/register">
+                    <i class="bi bi-person-plus me-1"></i>Регистрация
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Герой секция -->
+<div class="hero-section">
+    <div class="container position-relative">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="hero-title">ПАНЕЛЬ УПРАВЛЕНИЯ</h1>
+                <p class="hero-subtitle">
+                    Централизованное управление системой трекинга достижений.
+                    Мониторинг статистики, управление игроками и интеграциями.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="#stats" class="btn btn-steam">
+                        <i class="bi bi-speedometer2 me-2"></i>Мониторинг
+                    </a>
+                    <a href="#actions" class="btn btn-outline-steam">
+                        <i class="bi bi-lightning-charge me-2"></i>Быстрые действия
+                    </a>
+                    <th:block th:if="${session.authenticated != null}">
+                        <a href="/profile" class="btn btn-outline-steam">
+                            <i class="bi bi-person me-2"></i>Мой профиль
+                        </a>
+                    </th:block>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center">
+                <div class="mt-4 mt-lg-0">
+                    <div class="d-inline-block p-4 rounded-3" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.2);">
+                        <i class="bi bi-gear-fill display-1 text-light"></i>
+                        <h4 class="mt-3 mb-0">Управление системой</h4>
+                        <p class="opacity-75">Все инструменты в одном месте</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Основные функции -->
+<div class="container mb-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="section-title">ОСНОВНЫЕ ФУНКЦИИ</h2>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <h4 class="fw-bold mb-3">Управление игроками</h4>
+                <p class="text-muted mb-4">
+                    Полный контроль над профилями игроков. Добавление, редактирование,
+                    удаление и мониторинг активности.
+                </p>
+                <a href="/gamers" class="btn btn-steam w-100">
+                    <i class="bi bi-arrow-right me-2"></i>Перейти
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <i class="bi bi-steam"></i>
+                </div>
+                <h4 class="fw-bold mb-3">Интеграция Steam</h4>
+                <p class="text-muted mb-4">
+                    Подключение Steam API для автоматического импорта данных,
+                    синхронизация достижений и игрового времени.
+                </p>
+                <a href="/steam/connect" class="btn btn-steam w-100">
+                    <i class="bi bi-cloud-arrow-down me-2"></i>Подключить
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <i class="bi bi-trophy-fill"></i>
+                </div>
+                <h4 class="fw-bold mb-3">Таблица лидеров</h4>
+                <p class="text-muted mb-4">
+                    Рейтинг игроков по достижениям и статистике.
+                    Сравнение результатов и мотивация к прогрессу.
+                </p>
+                <a href="/leaderboards" class="btn btn-steam w-100">
+                    <i class="bi bi-bar-chart me-2"></i>Смотреть
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистика системы -->
+    <div id="stats" class="row mb-5">
+        <div class="col">
+            <h2 class="section-title">СТАТИСТИКА СИСТЕМЫ</h2>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="d-flex align-items-center">
+                    <div class="stats-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div>
+                        <div class="h4 mb-0 fw-bold" th:text="${totalPlayers ?: '0'}">0</div>
+                        <div class="text-muted small">Игроков в системе</div>
+                    </div>
+                </div>
+                <div class="progress-steam mt-3">
+                    <div class="progress-bar" style="width: 75%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="d-flex align-items-center">
+                    <div class="stats-icon">
+                        <i class="bi bi-controller"></i>
+                    </div>
+                    <div>
+                        <div class="h4 mb-0 fw-bold" th:text="${totalGames ?: '0'}">0</div>
+                        <div class="text-muted small">Отслеживаемых игр</div>
+                    </div>
+                </div>
+                <div class="progress-steam mt-3">
+                    <div class="progress-bar" style="width: 60%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="d-flex align-items-center">
+                    <div class="stats-icon">
+                        <i class="bi bi-award"></i>
+                    </div>
+                    <div>
+                        <div class="h4 mb-0 fw-bold" th:text="${totalAchievements ?: '0'}">0</div>
+                        <div class="text-muted small">Всего достижений</div>
+                    </div>
+                </div>
+                <div class="progress-steam mt-3">
+                    <div class="progress-bar" style="width: 45%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="d-flex align-items-center">
+                    <div class="stats-icon">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <div>
+                        <div class="h4 mb-0 fw-bold" th:text="${totalPlaytime ?: '0'}">0</div>
+                        <div class="text-muted small">Часов игрового времени</div>
+                    </div>
+                </div>
+                <div class="progress-steam mt-3">
+                    <div class="progress-bar" style="width: 85%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Быстрые действия и Активность -->
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div id="actions" class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-dark text-white py-3" style="border-radius: 15px 15px 0 0;">
+                    <h5 class="mb-0"><i class="bi bi-lightning-charge me-2"></i>БЫСТРЫЕ ДЕЙСТВИЯ</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="/gamers/create" class="quick-action-btn">
+                                <i class="bi bi-person-plus display-6 text-primary mb-3"></i>
+                                <h6>Добавить игрока</h6>
+                                <p class="text-muted small mb-0">Создание нового профиля игрока</p>
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="/steam/connect" class="quick-action-btn">
+                                <i class="bi bi-cloud-arrow-down display-6 text-dark mb-3"></i>
+                                <h6>Импорт из Steam</h6>
+                                <p class="text-muted small mb-0">Синхронизация с Steam API</p>
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="/api-demo" class="quick-action-btn">
+                                <i class="bi bi-code-slash display-6 text-success mb-3"></i>
+                                <h6>API Демо</h6>
+                                <p class="text-muted small mb-0">Тестирование REST API</p>
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="/leaderboards" class="quick-action-btn">
+                                <i class="bi bi-trophy display-6 text-warning mb-3"></i>
+                                <h6>Таблица лидеров</h6>
+                                <p class="text-muted small mb-0">Просмотр рейтинга игроков</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-dark text-white py-3" style="border-radius: 15px 15px 0 0;">
+                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>ПОСЛЕДНЯЯ АКТИВНОСТЬ</h5>
+                </div>
+                <div class="card-body">
+                    <div class="activity-item">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="fw-bold mb-0">Новый игрок зарегистрирован</h6>
+                            <small class="text-muted">Сегодня, 10:30</small>
+                        </div>
+                        <p class="small text-muted mb-0">Добавлен новый пользователь в систему</p>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="fw-bold mb-0">Получено достижение</h6>
+                            <small class="text-muted">Вчера, 18:45</small>
+                        </div>
+                        <p class="small text-muted mb-0">Игрок "SteamGamer" разблокировал достижение</p>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="fw-bold mb-0">Steam синхронизация</h6>
+                            <small class="text-muted">2 дня назад</small>
+                        </div>
+                        <p class="small text-muted mb-0">Успешно синхронизированы данные из Steam</p>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="fw-bold mb-0">Обновлена статистика</h6>
+                            <small class="text-muted">3 дня назад</small>
+                        </div>
+                        <p class="small text-muted mb-0">Обновлены данные таблицы лидеров</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="steam-gradient text-white py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-trophy-fill me-2"></i>Achievement Tracker
+                </h5>
+                <p class="opacity-75">
+                    Профессиональная система для отслеживания игровых достижений и статистики.
+                    Интеграция с популярными игровыми платформами.
+                </p>
+            </div>
+            <div class="col-md-4">
+                <h6 class="fw-bold mb-3">Быстрые ссылки</h6>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <a href="/" class="text-decoration-none text-white opacity-75 hover-opacity-100">
+                            <i class="bi bi-house me-2"></i>Главная
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="/gamers" class="text-decoration-none text-white opacity-75 hover-opacity-100">
+                            <i class="bi bi-people me-2"></i>Игроки
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="/leaderboards" class="text-decoration-none text-white opacity-75 hover-opacity-100">
+                            <i class="bi bi-trophy me-2"></i>Лидеры
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="/dashboard" class="text-decoration-none text-white opacity-75 hover-opacity-100">
+                            <i class="bi bi-speedometer2 me-2"></i>Панель управления
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h6 class="fw-bold mb-3">Технологии</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="badge bg-steam-accent py-2">Spring Boot 3.2.3</span>
+                    <span class="badge bg-steam-accent py-2">PostgreSQL</span>
+                    <span class="badge bg-steam-accent py-2">RabbitMQ</span>
+                    <span class="badge bg-steam-accent py-2">Thymeleaf</span>
+                    <span class="badge bg-steam-accent py-2">Bootstrap 5</span>
+                    <span class="badge bg-steam-accent py-2">Steam API</span>
+                </div>
+                <div class="mt-4">
+                    <p class="text-steam-accent small mb-1">
+                        <i class="bi bi-info-circle me-1"></i>Демонстрационная система
+                    </p>
+                    <p class="opacity-75 small">Все данные представлены для демонстрационных целей</p>
+                </div>
+            </div>
+        </div>
+        <hr class="my-4 opacity-25">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <p class="mb-0 opacity-75 small">
+                    © 2024 Achievement Tracker. Демонстрационный проект.
+                </p>
+            </div>
+            <div class="col-md-6 text-end">
+                <a href="/api-demo" class="btn btn-outline-light btn-sm me-2">
+                    <i class="bi bi-code-slash"></i> API Демо
+                </a>
+                <a href="/admin" class="btn btn-outline-light btn-sm">
+                    <i class="bi bi-gear"></i> Админка
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Добавляем динамические значения
+    document.addEventListener('DOMContentLoaded', function() {
+        // Пример динамического обновления статистики
+        const stats = document.querySelectorAll('.stats-card .h4');
+
+        // Имитация загрузки данных
+        setTimeout(() => {
+            stats.forEach(stat => {
+                const current = parseInt(stat.textContent);
+                const target = current * 1.2; // Увеличиваем на 20% для демо
+                animateValue(stat, current, target, 1000);
+            });
+        }, 500);
+
+        function animateValue(element, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const value = Math.floor(progress * (end - start) + start);
+                element.textContent = value.toLocaleString();
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+    });
+</script>
+</body>
+</html>

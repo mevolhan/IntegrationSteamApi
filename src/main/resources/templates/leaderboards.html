@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Таблица лидеров - Achievement Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --steam-dark: #171a21;
+            --steam-blue: #1b2838;
+            --steam-light-blue: #2a475e;
+            --steam-accent: #66c0f4;
+            --steam-text: #c7d5e0;
+        }
+
+        /* Добавьте эти стили в секцию <style> */
+
+        /* Стили для навигации (как в home.html) */
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            margin: 0 2px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: linear-gradient(135deg, var(--steam-accent) 0%, var(--steam-light-blue) 100%);
+            color: white !important;
+        }
+
+        .user-avatar-nav {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--steam-accent) 0%, var(--steam-light-blue) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            margin-right: 10px;
+        }
+
+        /* Стили для dropdown */
+        .dropdown-menu {
+            border-radius: 10px;
+            border: 2px solid var(--steam-accent);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        .dropdown-item {
+            padding: 10px 16px;
+            border-radius: 6px;
+            margin: 2px 8px;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, var(--steam-accent) 0%, var(--steam-light-blue) 100%);
+            color: white;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--steam-dark) 0%, var(--steam-blue) 50%, var(--steam-light-blue) 100%);
+            color: white;
+            padding: 80px 0 60px;
+            margin-bottom: 50px;
+            border-radius: 0 0 20px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(102, 192, 244, 0.1) 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .rank-badge {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.4rem;
+            margin: 0 auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .rank-1 {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #000;
+            border: 3px solid rgba(255, 215, 0, 0.8);
+        }
+
+        .rank-2 {
+            background: linear-gradient(135deg, #C0C0C0 0%, #A0A0A0 100%);
+            color: #000;
+            border: 3px solid rgba(192, 192, 192, 0.8);
+        }
+
+        .rank-3 {
+            background: linear-gradient(135deg, #CD7F32 0%, #A0522D 100%);
+            color: #fff;
+            border: 3px solid rgba(205, 127, 50, 0.8);
+        }
+
+        .rank-other {
+            background: #f8f9fa;
+            color: #495057;
+            border: 2px solid #dee2e6;
+        }
+
+        .player-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--steam-accent);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+        }
+
+        .player-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 24px rgba(102, 192, 244, 0.15);
+            border-left-color: #ffd700;
+        }
+
+        .player-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--steam-accent);
+            box-shadow: 0 4px 8px rgba(102, 192, 244, 0.2);
+        }
+
+        .avatar-placeholder {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--steam-accent) 0%, var(--steam-light-blue) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .platform-badge {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .bg-steam {
+            background: linear-gradient(135deg, var(--steam-dark) 0%, var(--steam-light-blue) 100%);
+            color: white;
+            border: 1px solid var(--steam-accent);
+        }
+
+        .bg-xbox {
+            background: linear-gradient(135deg, #107c10 0%, #0a5a0a 100%);
+            color: white;
+            border: 1px solid #20b020;
+        }
+
+        .bg-psn {
+            background: linear-gradient(135deg, #006fcd 0%, #0057a3 100%);
+            color: white;
+            border: 1px solid #2a8fe3;
+        }
+
+        .bg-epic {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            color: white;
+            border: 1px solid #404040;
+        }
+
+        .bg-nintendo {
+            background: linear-gradient(135deg, #e60012 0%, #b0000e 100%);
+            color: white;
+            border: 1px solid #ff3344;
+        }
+
+        .stats-badge {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 10px 15px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .stats-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background: linear-gradient(135deg, var(--steam-accent) 0%, var(--steam-light-blue) 100%);
+            color: white;
+        }
+
+        .filter-chip {
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+
+        .filter-chip.active {
+            background: linear-gradient(135deg, var(--steam-accent) 0%, var(--steam-light-blue) 100%);
+            color: white;
+            border-color: white;
+            box-shadow: 0 4px 12px rgba(102, 192, 244, 0.3);
+        }
+
+        .filter-chip:not(.active) {
+            background: white;
+            color: var(--steam-dark);
+            border-color: #dee2e6;
+        }
+
+        .filter-chip:not(.active):hover {
+            border-color: var(--steam-accent);
+            transform: translateY(-2px);
+        }
+
+        .progress-steam {
+            height: 10px;
+            border-radius: 5px;
+            background-color: #e9ecef;
+            overflow: hidden;
+        }
+
+        .progress-steam .progress-bar {
+            background: linear-gradient(90deg, var(--steam-accent) 0%, var(--steam-light-blue) 100%);
+            border-radius: 5px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 3rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--steam-dark) 0%, var(--steam-light-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--steam-accent) 0%, var(--steam-light-blue) 100%);
+            border-radius: 2px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            height: 100%;
+            text-align: center;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(102, 192, 244, 0.15);
+            border-color: var(--steam-accent);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, var(--steam-accent) 0%, var(--steam-light-blue) 100%);
+            color: white;
+            box-shadow: 0 4px 8px rgba(102, 192, 244, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--steam-dark) 0%, var(--steam-light-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-steam {
+            background: linear-gradient(135deg, var(--steam-dark) 0%, var(--steam-light-blue) 100%);
+            border: 2px solid var(--steam-accent);
+            color: white;
+            border-radius: 10px;
+            padding: 10px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-steam:hover {
+            background: linear-gradient(135deg, var(--steam-accent) 0%, var(--steam-light-blue) 100%);
+            border-color: white;
+            color: var(--steam-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 192, 244, 0.3);
+        }
+
+        .btn-outline-steam {
+            border: 2px solid var(--steam-accent);
+            color: var(--steam-accent);
+            background: transparent;
+            border-radius: 10px;
+            padding: 10px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-steam:hover {
+            background: var(--steam-accent);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 192, 244, 0.3);
+        }
+    </style>
+</head>
+<body>
+<!-- Обновленная Навигационная панель -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/">
+            <i class="bi bi-trophy-fill me-2"></i>Achievement Tracker
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">
+                        Главная
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/gamers">
+                        Игроки
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/leaderboards">
+                        Таблица лидеров
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/steam/connect">
+                        Steam
+                    </a>
+                </li>
+                <th:block th:if="${session.authenticated != null}">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/profile">
+                            Профиль
+                        </a>
+                    </li>
+                </th:block>
+            </ul>
+
+            <!-- Профиль пользователя -->
+            <div class="navbar-nav" th:if="${session.authenticated != null}">
+                <div class="nav-item dropdown">
+                    <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center"
+                            type="button"
+                            id="userDropdown"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                            style="border-radius: 10px; padding: 8px 16px;">
+                        <div class="user-avatar-nav me-2">
+                            <span th:text="${#strings.substring(session.username, 0, 1).toUpperCase()}"></span>
+                        </div>
+                        <span th:text="${session.username}" class="fw-bold"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown" style="border-radius: 10px; border: 2px solid var(--steam-accent);">
+                        <li>
+                            <a class="dropdown-item" href="/profile">
+                                <i class="bi bi-person me-2"></i>Мой профиль
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/profile/edit">
+                                <i class="bi bi-pencil me-2"></i>Редактировать
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="/logout">
+                                <i class="bi bi-box-arrow-right me-2"></i>Выйти
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="navbar-nav" th:unless="${session.authenticated != null}">
+                <a class="nav-link" href="/login">
+                    <i class="bi bi-box-arrow-in-right me-1"></i>Вход
+                </a>
+                <a class="nav-link" href="/register">
+                    <i class="bi bi-person-plus me-1"></i>Регистрация
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Герой секция -->
+<div class="hero-section">
+    <div class="container position-relative">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="hero-title">ТАБЛИЦА ЛИДЕРОВ</h1>
+                <p class="hero-subtitle">
+                    Сравните свои достижения с другими игроками. Рейтинг по количеству достижений,
+                    игровому времени и завершенным играм.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="#leaderboard" class="btn btn-steam">
+                        <i class="bi bi-trophy me-2"></i>Смотреть рейтинг
+                    </a>
+                    <a href="/gamers" class="btn btn-outline-steam">
+                        <i class="bi bi-people me-2"></i>Все игроки
+                    </a>
+                    <th:block th:if="${session.authenticated != null}">
+                        <a href="/profile" class="btn btn-outline-steam">
+                            <i class="bi bi-person me-2"></i>Мой профиль
+                        </a>
+                    </th:block>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center">
+                <div class="mt-4 mt-lg-0">
+                    <div class="d-inline-block p-4 rounded-3" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.2);">
+                        <i class="bi bi-trophy-fill display-1 text-warning"></i>
+                        <h4 class="mt-3 mb-0">Топ игроков</h4>
+                        <p class="opacity-75">Соревнуйтесь за первое место</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Статистика -->
+<div class="container mb-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="section-title">ОБЩАЯ СТАТИСТИКА</h2>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div class="stat-number" th:text="${totalGamers}">0</div>
+                <div class="stat-label">ИГРОКОВ В РЕЙТИНГЕ</div>
+                <p class="text-muted small mt-2">Всего зарегистрированных игроков</p>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-award-fill"></i>
+                </div>
+                <div class="stat-number" th:text="${#numbers.formatInteger(totalAchievements, 0, 'POINT')}">0</div>
+                <div class="stat-label">ВСЕГО ДОСТИЖЕНИЙ</div>
+                <p class="text-muted small mt-2">Получено всеми игроками</p>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-controller"></i>
+                </div>
+                <div class="stat-number" th:text="${totalGames}">0</div>
+                <div class="stat-label">ОТСЛЕЖИВАЕМЫХ ИГР</div>
+                <p class="text-muted small mt-2">Игр в системе</p>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-clock-fill"></i>
+                </div>
+                <div class="stat-number" th:text="${#numbers.formatInteger(totalPlaytime, 0, 'POINT')}">0</div>
+                <div class="stat-label">ЧАСОВ В ИГРЕ</div>
+                <p class="text-muted small mt-2">Суммарное игровое время</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Фильтры -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h4 class="fw-bold mb-4 text-steam-dark">
+                <i class="bi bi-funnel me-2"></i>ФИЛЬТРАЦИЯ И СОРТИРОВКА
+            </h4>
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="text-muted mb-3 mb-md-0">Выберите критерий для ранжирования игроков</p>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+                        <button class="filter-chip active" onclick="sortBy('achievements')">
+                            <i class="bi bi-award me-2"></i>По достижениям
+                        </button>
+                        <button class="filter-chip" onclick="sortBy('playtime')">
+                            <i class="bi bi-clock me-2"></i>По времени
+                        </button>
+                        <button class="filter-chip" onclick="sortBy('games')">
+                            <i class="bi bi-controller me-2"></i>По играм
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Таблица лидеров -->
+    <div id="leaderboard" class="card border-0 shadow-sm mb-5">
+        <div class="card-header bg-dark text-white py-3" style="border-radius: 15px 15px 0 0;">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h4 class="mb-0"><i class="bi bi-trophy me-2"></i>ТОП ИГРОКОВ СИСТЕМЫ</h4>
+                </div>
+                <div class="col-auto">
+                    <span class="badge bg-steam-accent py-2 px-3">
+                        Всего: <span th:text="${totalGamers}">0</span> игроков
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th width="80" class="text-center ps-4">Ранг</th>
+                        <th>Игрок</th>
+                        <th width="140" class="text-center">Платформа</th>
+                        <th width="140" class="text-center">Достижения</th>
+                        <th width="140" class="text-center">Игры</th>
+                        <th width="140" class="text-center">Игровое время</th>
+                        <th width="120" class="text-center pe-4">Прогресс</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="gamer, stat : ${gamers}">
+                        <td class="text-center ps-4">
+                            <div th:class="'rank-badge ' + ${stat.count <= 3 ? 'rank-' + stat.count : 'rank-other'}">
+                                <span th:text="${stat.count}"></span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <img th:if="${gamer.avatarUrl}"
+                                         th:src="${gamer.avatarUrl}"
+                                         class="player-avatar"
+                                         alt="Avatar">
+                                    <div th:if="${gamer.avatarUrl == null}" class="avatar-placeholder">
+                                        <span th:text="${gamer.username.substring(0, 1).toUpperCase()}"></span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="fw-bold" th:text="${gamer.username}">username</div>
+                                    <div th:if="${gamer.displayName}" class="text-muted small"
+                                         th:text="${gamer.displayName}"></div>
+                                    <div class="small text-muted" th:text="${#temporals.format(gamer.registeredAt, 'dd.MM.yyyy')}"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <span class="platform-badge"
+                                  th:classappend="${gamer.platform} == 'STEAM' ? 'bg-steam' :
+                                                (${gamer.platform} == 'XBOX' ? 'bg-xbox' :
+                                                (${gamer.platform} == 'PSN' ? 'bg-psn' :
+                                                (${gamer.platform} == 'EPIC' ? 'bg-epic' : 'bg-nintendo')))">
+                                <i th:classappend="${gamer.platform} == 'STEAM' ? 'bi-steam' :
+                                                   (${gamer.platform} == 'XBOX' ? 'bi-xbox' :
+                                                   (${gamer.platform} == 'PSN' ? 'bi-playstation' :
+                                                   (${gamer.platform} == 'EPIC' ? 'bi-egg-fried' : 'bi-nintendo-switch')))"
+                                   class="bi me-1"></i>
+                                <span th:text="${gamer.platform}"></span>
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <div class="stats-badge">
+                                <div class="stats-icon">
+                                    <i class="bi bi-award"></i>
+                                </div>
+                                <span class="fw-bold" th:text="${gamer.totalAchievements}">0</span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div class="stats-badge">
+                                <div class="stats-icon">
+                                    <i class="bi bi-controller"></i>
+                                </div>
+                                <span class="fw-bold" th:text="${gamer.totalGames}">0</span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div class="stats-badge">
+                                <div class="stats-icon">
+                                    <i class="bi bi-clock"></i>
+                                </div>
+                                <span class="fw-bold" th:text="${gamer.totalPlaytime}">0</span> ч
+                            </div>
+                        </td>
+                        <td class="pe-4">
+                            <div class="progress-steam mb-2">
+                                <div class="progress-bar"
+                                     th:style="'width: ' + ${gamer.totalAchievements > 0 ? (gamer.totalAchievements / 1000 * 100) : 0} + '%;'">
+                                </div>
+                            </div>
+                            <div class="text-center small fw-bold"
+                                 th:text="${gamer.totalAchievements > 0 ? (gamer.totalAchievements / 1000 * 100) : 0} + '%'">
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${gamers.empty}">
+                        <td colspan="7" class="text-center py-5">
+                            <div class="text-muted py-4">
+                                <i class="bi bi-trophy display-4 d-block mb-3 opacity-50"></i>
+                                <h5>Игроки не найдены</h5>
+                                <p class="mb-3">Добавьте игроков в систему для создания таблицы лидеров</p>
+                                <a href="/gamers/create" class="btn btn-steam">
+                                    <i class="bi bi-person-plus me-2"></i>Добавить игрока
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Платформенная статистика -->
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-dark text-white py-3" style="border-radius: 15px 15px 0 0;">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>РАСПРЕДЕЛЕНИЕ ПО ПЛАТФОРМАМ</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 py-3">
+                            <div class="d-flex align-items-center">
+                                <span class="platform-badge bg-steam me-3">STEAM</span>
+                                <span>Steam</span>
+                            </div>
+                            <span class="badge bg-primary rounded-pill py-2 px-3">
+                                <span th:text="${steamCount}">0</span> игроков
+                            </span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 py-3">
+                            <div class="d-flex align-items-center">
+                                <span class="platform-badge bg-xbox me-3">XBOX</span>
+                                <span>Xbox</span>
+                            </div>
+                            <span class="badge bg-primary rounded-pill py-2 px-3">
+                                <span th:text="${xboxCount}">0</span> игроков
+                            </span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 py-3">
+                            <div class="d-flex align-items-center">
+                                <span class="platform-badge bg-psn me-3">PSN</span>
+                                <span>PlayStation</span>
+                            </div>
+                            <span class="badge bg-primary rounded-pill py-2 px-3">
+                                <span th:text="${psnCount}">0</span> игроков
+                            </span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 py-3">
+                            <div class="d-flex align-items-center">
+                                <span class="platform-badge bg-epic me-3">EPIC</span>
+                                <span>Epic Games</span>
+                            </div>
+                            <span class="badge bg-primary rounded-pill py-2 px-3">
+                                <span th:text="${epicCount}">0</span> игроков
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-dark text-white py-3" style="border-radius: 15px 15px 0 0;">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>СТАТИСТИКА СИСТЕМЫ</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-4">
+                            <div class="display-4 text-primary fw-bold" th:text="${totalAchievements}">0</div>
+                            <p class="text-muted small mb-0">Всего достижений</p>
+                        </div>
+                        <div class="col-6 mb-4">
+                            <div class="display-4 text-success fw-bold" th:text="${totalPlaytime}">0</div>
+                            <p class="text-muted small mb-0">Часов в игре</p>
+                        </div>
+                        <div class="col-6">
+                            <div class="display-4 text-warning fw-bold" th:text="${totalGames}">0</div>
+                            <p class="text-muted small mb-0">Всего игр</p>
+                        </div>
+                        <div class="col-6">
+                            <div class="display-4 text-info fw-bold" th:text="${#lists.size(gamers)}">0</div>
+                            <p class="text-muted small mb-0">Активных игроков</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-top text-center">
+                        <p class="text-muted small mb-2">Данные обновляются автоматически</p>
+                        <a href="/steam/connect" class="btn btn-outline-steam btn-sm">
+                            <i class="bi bi-cloud-arrow-down me-1"></i>Синхронизировать Steam
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="steam-gradient text-white py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-trophy-fill me-2"></i>Achievement Tracker
+                </h5>
+                <p class="opacity-75">
+                    Профессиональная система для отслеживания игровых достижений и статистики.
+                    Интеграция с популярными игровыми платформами.
+                </p>
+            </div>
+            <div class="col-md-4">
+                <h6 class="fw-bold mb-3">Быстрые ссылки</h6>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <a href="/" class="text-decoration-none text-white opacity-75 hover-opacity-100">
+                            <i class="bi bi-house me-2"></i>Главная
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="/gamers" class="text-decoration-none text-white opacity-75 hover-opacity-100">
+                            <i class="bi bi-people me-2"></i>Игроки
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="/leaderboards" class="text-decoration-none text-white opacity-75 hover-opacity-100">
+                            <i class="bi bi-trophy me-2"></i>Таблица лидеров
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="/steam/connect" class="text-decoration-none text-white opacity-75 hover-opacity-100">
+                            <i class="bi bi-steam me-2"></i>Steam
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h6 class="fw-bold mb-3">Технологии</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="badge bg-steam-accent py-2">Spring Boot 3.2.3</span>
+                    <span class="badge bg-steam-accent py-2">PostgreSQL</span>
+                    <span class="badge bg-steam-accent py-2">RabbitMQ</span>
+                    <span class="badge bg-steam-accent py-2">Thymeleaf</span>
+                    <span class="badge bg-steam-accent py-2">Bootstrap 5</span>
+                    <span class="badge bg-steam-accent py-2">Steam API</span>
+                </div>
+                <div class="mt-4">
+                    <p class="text-steam-accent small mb-1">
+                        <i class="bi bi-info-circle me-1"></i>Демонстрационная система
+                    </p>
+                    <p class="opacity-75 small">Все данные представлены для демонстрационных целей</p>
+                </div>
+            </div>
+        </div>
+        <hr class="my-4 opacity-25">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <p class="mb-0 opacity-75 small">
+                    © 2024 Achievement Tracker. Демонстрационный проект.
+                </p>
+            </div>
+            <div class="col-md-6 text-end">
+                <a href="/api-demo" class="btn btn-outline-light btn-sm me-2">
+                    <i class="bi bi-code-slash"></i> API Демо
+                </a>
+                <a href="/admin" class="btn btn-outline-light btn-sm">
+                    <i class="bi bi-gear"></i> Админка
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function sortBy(criteria) {
+        // Удаляем активный класс у всех кнопок
+        document.querySelectorAll('.filter-chip').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // Добавляем активный класс текущей кнопке
+        event.target.classList.add('active');
+
+        console.log('Сортировка по:', criteria);
+        // Здесь можно добавить AJAX запрос для сортировки
+    }
+
+    // Добавляем классы для стилей
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.text-steam-dark').forEach(el => {
+            el.style.color = 'var(--steam-dark)';
+        });
+        document.querySelectorAll('.bg-steam-accent').forEach(el => {
+            el.style.background = 'var(--steam-accent)';
+        });
+    });
+</script>
+</body>
+</html>

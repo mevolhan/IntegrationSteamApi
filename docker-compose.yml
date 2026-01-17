@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: gamer_db
+    environment:
+      POSTGRES_PASSWORD: password123
+      POSTGRES_USER: gamer
+      POSTGRES_DB: achievement_tracker
+    ports:
+      - "5432:5432"
+    restart: on-failure
+
+  rabbitmq:
+    image: rabbitmq:latest
+    container_name: gamer_mq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: on-failure
